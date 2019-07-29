@@ -1,6 +1,5 @@
-.vscode
 
 main
-main.dSYM/
+main*dSYM/
 
 *.o
