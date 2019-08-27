@@ -10,6 +10,9 @@
             },
             "osx": {
                 "command": "feg && make"
+            },
+            "linux": {
+                "command": "feg && make"
             }
         }
     ]
