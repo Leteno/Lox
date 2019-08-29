@@ -9,10 +9,10 @@
                 "isDefault": true
             },
             "osx": {
-                "command": "feg && make"
+                "command": "make"
             },
             "linux": {
-                "command": "feg && make"
+                "command": "make"
             }
         }
     ]
