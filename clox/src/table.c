@@ -33,7 +33,15 @@ static Entry* findEntry(Entry* entries, int capacity,
                 return tombstone != NULL ? tombstone : entry;
             } else {
                 // We found a tombstone.
-                if (tombstone == NULL) tombstone = entry;
+                // modify this:
+                // if (tombstone == NULL) tombstone = entry;
+                // modify end
+                if (tombstone == NULL) {
+                    tombstone = entry;
+                } else if (tombstone == entry) {
+                    // we got a loop
+                    return tombstone;
+                }
             }
         } else if (entry->key == key) {
             // We found the key.
@@ -114,6 +122,7 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
     if (table->entries == NULL) return NULL;
 
     uint32_t index = hash % table->capacity;
+    Entry* tombstone = NULL;
 
     for (;;) {
         Entry* entry = &table->entries[index];
@@ -121,6 +130,13 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
         if (entry->key == NULL) {
             // Stop if we find an empty non-tombstone entry.
             if (IS_NIL(entry->value)) return NULL;
+            if (tombstone == NULL) {
+                // if we don't have, record
+                tombstone = entry;
+            } else if (tombstone == entry) {
+                // We get a loop, that means chars is not in Table
+                return NULL;
+            }
         } else if (entry->key->length == length &&
                    entry->key->hash == hash &&
                    memcmp(entry->key->chars, chars, length) == 0) {
