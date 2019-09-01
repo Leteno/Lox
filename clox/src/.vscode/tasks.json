@@ -9,10 +9,10 @@
                 "isDefault": true
             },
             "osx": {
-                "command": "make"
+                "command": "make clean && make"
             },
             "linux": {
-                "command": "make"
+                "command": "make clean && make"
             }
         }
     ]
