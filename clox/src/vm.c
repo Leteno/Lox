@@ -37,6 +37,7 @@ void initVM() {
 }
 
 void freeVM() {
+    printTableQueryEfficency();
     freeTable(&vm.strings);
     freeObjects();
 }

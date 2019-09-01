@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include "stdio.h"
 
 #include "memory.h"
 #include "object.h"
@@ -7,6 +8,13 @@
 #include "value.h"
 
 #define TABLE_MAX_LOAD 0.75
+
+int queryAmount = 0;
+int searchAmount = 0;
+
+void printTableQueryEfficency() {
+    printf("HashTable efficency:\tquery: %d, search: %d\n", queryAmount, searchAmount);
+}
 
 void initTable(Table* table) {
     table->count = 0;
@@ -23,9 +31,11 @@ static Entry* findEntry(Entry* entries, int capacity,
                         ObjString* key) {
     uint32_t index = key->hash % capacity;
     Entry* tombstone = NULL;
+    ++queryAmount;
 
     for (;;) {
         Entry* entry = &entries[index];
+        ++searchAmount;
 
         if (entry->key == NULL) {
             if (IS_NIL(entry->value)) {
@@ -123,9 +133,11 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
 
     uint32_t index = hash % table->capacity;
     Entry* tombstone = NULL;
+    ++queryAmount;
 
     for (;;) {
         Entry* entry = &table->entries[index];
+        ++searchAmount;
 
         if (entry->key == NULL) {
             // Stop if we find an empty non-tombstone entry.
