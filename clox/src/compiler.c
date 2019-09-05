@@ -45,6 +45,7 @@ static void binary();
 static void literal();
 static void number();
 static void string();
+static void variable();
 
 ParseRule rules[] = {
     { grouping, NULL,    PREC_NONE },       // TOKEN_LEFT_PAREN
@@ -66,8 +67,8 @@ ParseRule rules[] = {
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_GREATER_EQUAL
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER
-    { string,     NULL,    PREC_NONE },       // TOKEN_STRING
+    { variable, NULL,    PREC_NONE },       // TOKEN_IDENTIFIER
+    { string,   NULL,    PREC_NONE },       // TOKEN_STRING
     { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER
     { NULL,     NULL,    PREC_NONE },       // TOKEN_AND
     { NULL,     NULL,    PREC_NONE },       // TOKEN_CLASS
@@ -95,9 +96,9 @@ static void advance();
 static void expression();
 static void declaration();
 static void varDeclaration();
-static parseVariable(const char* errorMessage);
+static uint8_t parseVariable(const char* errorMessage);
 static uint8_t identifierConstant(Token* name);
-static defineVariable(uint8_t global);
+static void defineVariable(uint8_t global);
 static void statement();
 static void printStatement();
 static void expressionStatement();
@@ -172,7 +173,7 @@ static void varDeclaration() {
     defineVariable(global);
 }
 
-static parseVariable(const char* errorMessage) {
+static uint8_t parseVariable(const char* errorMessage) {
     consume(TOKEN_IDENTIFIER, errorMessage);
     return identifierConstant(&parser.previous);
 }
@@ -181,7 +182,7 @@ static uint8_t identifierConstant(Token* name) {
     return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
 }
 
-static defineVariable(uint8_t global) {
+static void defineVariable(uint8_t global) {
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
@@ -309,6 +310,16 @@ static void number() {
 static void string() {
     emitConstant(OBJ_VAL(copyString(parser.previous.start + 1,
                                     parser.previous.length - 2)));
+}
+
+static void namedVariable(Token name) {
+    uint8_t arg = identifierConstant(&name);
+
+    emitBytes(OP_GET_GLOBAL, arg);
+}
+
+static void variable() {
+    namedVariable(parser.previous);
 }
 
 static void consume(TokenType type, const char* message) {
